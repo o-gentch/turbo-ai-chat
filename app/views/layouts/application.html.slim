@@ -15,5 +15,5 @@ html
     = stylesheet_link_tag :app, "data-turbo-track": "reload"
     = javascript_include_tag "application", "data-turbo-track": "reload", type: "module"
 
-  body class=turbo_native_app? ? "turbo-native" : ""
+  body class="#{turbo_native_app? ? "turbo-native" : ""}"
     = yield
