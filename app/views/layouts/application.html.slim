@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    title = content_for(:title) || "AI Chat"
+    meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"
+    meta name="apple-mobile-web-app-capable" content="yes"
+    meta name="apple-mobile-web-app-status-bar-style" content="default"
+    meta name="application-name" content="AI Chat"
+    meta name="mobile-web-app-capable" content="yes"
+    = csrf_meta_tags
+    = csp_meta_tag
+    = yield :head
+    link rel="icon" href="/icon.png" type="image/png"
+    link rel="apple-touch-icon" href="/icon.png"
+    = stylesheet_link_tag :app, "data-turbo-track": "reload"
+    = javascript_include_tag "application", "data-turbo-track": "reload", type: "module"
+
+  body class=turbo_native_app? ? "turbo-native" : ""
+    = yield
