@@ -7,6 +7,15 @@ export default class extends Controller {
     this.scrollToBottom()
     if (this.hasInputTarget) {
       this.autoResize()
+      this.autoResizeDebounced = this.debounce(() => this.autoResize(), 150)
+    }
+  }
+
+  debounce(fn, ms) {
+    let id
+    return () => {
+      clearTimeout(id)
+      id = setTimeout(fn, ms)
     }
   }
 
@@ -105,6 +114,14 @@ export default class extends Controller {
         el.scrollTop = el.scrollHeight
       })
     }
+  }
+
+  onInput() {
+    if (!this.isTurboNative) this.autoResizeDebounced?.()
+  }
+
+  get isTurboNative() {
+    return /Turbo Native/i.test(navigator.userAgent)
   }
 
   autoResize() {

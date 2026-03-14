@@ -1,10 +1,17 @@
 @import "tailwindcss";
 
 /* ─── Chat layout: full-screen, fixed header/footer ─── */
-html, body {
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
   height: 100%;
   overflow: hidden;
   background-color: #f9fafb;
+  margin: 0;
+  padding: 0;
 }
 
 .chat-layout {
@@ -31,6 +38,7 @@ html, body {
 
 .chat-messages {
   flex: 1;
+  min-height: 0; /* важно для flex — иначе footer уезжает вниз */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -40,10 +48,19 @@ html, body {
 .chat-footer {
   flex-shrink: 0;
   padding: 12px 16px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #e5e7eb;
   background: #ffffff;
   /* safe area для home indicator на iPhone X+ */
-  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* Поле ввода — явные размеры и оптимизация для iOS WebView */
+#message-form textarea {
+  min-height: 44px !important;
+  /* Снижает лаги при вводе в WKWebView */
+  -webkit-appearance: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Убираем кнопку назад в Turbo Native (нативная навигация сама справится) */
