@@ -1,69 +1,59 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["messages", "input", "submit", "layout"]
+  static targets = ["input", "submit"]
 
   connect() {
     this.scrollToBottom()
-    if (this.hasInputTarget) {
-      this.autoResize()
-      this.autoResizeDebounced = this.debounce(() => this.autoResize(), 150)
-    }
   }
 
-  debounce(fn, ms) {
-    let id
-    return () => {
-      clearTimeout(id)
-      id = setTimeout(fn, ms)
-    }
-  }
-
-  // Отправка по Cmd/Ctrl+Enter или Enter (без Shift)
   onKeydown(event) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()
-      this.element.closest("form")?.requestSubmit()
+      document.getElementById("message-form")?.querySelector("form")?.requestSubmit()
     }
   }
 
-  // Показываем индикатор "печатает..." и блокируем форму
   onSubmit(event) {
-    const content = this.inputTarget.value.trim()
+    const form = event.target
+    const input = form.querySelector("textarea")
+    const submit = form.querySelector("button[type=submit]")
+    const content = input?.value.trim()
+
     if (!content) {
       event.preventDefault()
       return
     }
 
-    this.submitTarget.disabled = true
-    this.inputTarget.disabled = true
-
-    // Добавляем bubble с сообщением пользователя сразу (optimistic UI)
-    const userBubble = this.buildUserBubble(content)
-
-    if (this.hasMessagesTarget) {
-      const emptyState = document.getElementById("empty-state")
-      if (emptyState) {
-        emptyState.remove()
-        const wrapper = document.createElement("div")
-        wrapper.className = "pt-4 pb-2"
-        this.messagesTarget.appendChild(wrapper)
-      }
-
-      const wrapper = this.messagesTarget.querySelector(".pt-4") || this.messagesTarget
-      wrapper.insertAdjacentHTML("beforeend", userBubble)
+    // Блокируем форму
+    if (submit) submit.disabled = true
+    if (input) {
+      input.disabled = true
+      input.value = ""
     }
 
-    // Добавляем индикатор "думает..."
-    this.showThinking()
+    // Убираем empty state
+    document.getElementById("empty-state")?.remove()
+
+    // Optimistic UI — сразу добавляем сообщение пользователя
+    this.appendToMessages(this.buildUserBubble(content))
+
+    // Показываем индикатор "думает..."
+    this.appendToMessages(this.buildThinkingIndicator())
+
     this.scrollToBottom()
+  }
+
+  appendToMessages(html) {
+    const messages = document.getElementById("messages")
+    if (messages) messages.insertAdjacentHTML("beforeend", html)
   }
 
   buildUserBubble(content) {
     const time = new Date().toLocaleTimeString("ru", { hour: "2-digit", minute: "2-digit" })
     return `
       <div class="flex justify-end mb-3 px-4">
-        <div class="max-w-[80%] order-2">
+        <div class="max-w-[80%]">
           <div class="rounded-2xl px-4 py-3 text-sm leading-relaxed break-words bg-indigo-600 text-white rounded-br-sm">
             ${this.escapeHtml(content)}
           </div>
@@ -72,10 +62,8 @@ export default class extends Controller {
       </div>`
   }
 
-  showThinking() {
-    if (document.getElementById("thinking-indicator")) return
-
-    const html = `
+  buildThinkingIndicator() {
+    return `
       <div id="thinking-indicator" class="flex justify-start mb-3 px-4">
         <div class="max-w-[80%]">
           <div class="flex items-center gap-2 mb-1">
@@ -95,40 +83,22 @@ export default class extends Controller {
           </div>
         </div>
       </div>`
-
-    const wrapper = this.hasMessagesTarget
-      ? (this.messagesTarget.querySelector(".pt-4") || this.messagesTarget)
-      : document.getElementById("messages")
-
-    if (wrapper) wrapper.insertAdjacentHTML("beforeend", html)
-    this.scrollToBottom()
   }
 
-  // Вызывается через turbo_stream.action :scroll_to_bottom
   scrollToBottom() {
-    const el = this.hasMessagesTarget
-      ? this.messagesTarget
-      : document.getElementById("messages")
-    if (el) {
-      requestAnimationFrame(() => {
-        el.scrollTop = el.scrollHeight
-      })
-    }
+    const el = document.getElementById("messages")
+    if (el) requestAnimationFrame(() => { el.scrollTop = el.scrollHeight })
   }
 
-  onInput() {
-    if (!this.isTurboNative) this.autoResizeDebounced?.()
+  onInput(event) {
+    if (this.isTurboNative) return
+    const input = event.target
+    input.style.height = "auto"
+    input.style.height = Math.min(input.scrollHeight, 128) + "px"
   }
 
   get isTurboNative() {
     return /Turbo Native/i.test(navigator.userAgent)
-  }
-
-  autoResize() {
-    if (!this.hasInputTarget) return
-    const input = this.inputTarget
-    input.style.height = "auto"
-    input.style.height = Math.min(input.scrollHeight, 128) + "px"
   }
 
   escapeHtml(str) {

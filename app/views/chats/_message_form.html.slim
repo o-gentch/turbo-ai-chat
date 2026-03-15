@@ -1,7 +1,7 @@
 = form_with model: @new_message || Message.new,
     url: messages_path,
     id: "message-form",
-    data: { controller: "chat", action: "turbo:submit-start->chat#onSubmit" } do |f|
+    data: { action: "turbo:submit-start->chat#onSubmit" } do |f|
 
   .flex.items-end.gap-2
     = f.text_area :content,
@@ -9,9 +9,9 @@
         rows: 1,
         autocomplete: "off",
         inputmode: "text",
-        class: "flex-1 min-h-[44px] resize-none rounded-2xl border-2 border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 max-h-32 leading-relaxed",
-        data: { chat_target: "input", action: "keydown->chat#onKeydown input->chat#onInput" }
+        class: "flex-1 min-h-[44px] resize-none rounded-2xl border-2 border-gray-300 bg-white px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 max-h-32 leading-relaxed",
+        data: { action: "keydown->chat#onKeydown input->chat#onInput" }
 
-    button.flex-shrink-0.w-11.h-11.bg-indigo-600.rounded-full.flex.items-center.justify-center.transition-colors.disabled:opacity-50 type="submit" data-chat-target="submit"
+    button.flex-shrink-0.w-11.h-11.bg-indigo-600.rounded-full.flex.items-center.justify-center.transition-colors.disabled:opacity-50 type="submit"
       svg.w-5.h-5.text-white.translate-x-0.5 fill="none" stroke="currentColor" viewBox="0 0 24 24"
         path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"

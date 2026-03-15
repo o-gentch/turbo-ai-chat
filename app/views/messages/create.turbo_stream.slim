@@ -1,9 +1,6 @@
 = turbo_stream.remove "thinking-indicator"
 
 = turbo_stream.append "messages" do
-  = render @user_message
-
-= turbo_stream.append "messages" do
   = render @ai_message
 
 = turbo_stream.replace "message-form" do
